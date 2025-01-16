@@ -1,6 +1,6 @@
 {
   "apiToken": "2/1209167618765945/1209167702621000:a76c91bad550f74d018425495230d8cc",
   "workspaceGID": "1209167618765957",
-  "extractionRateString": "2s",
+  "extractionRateString": "30s",
   "baseURL": "https://app.asana.com/api/1.0"
 }
