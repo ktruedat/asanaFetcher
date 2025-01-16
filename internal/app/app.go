@@ -16,14 +16,13 @@ import (
 )
 
 type App struct {
-	cfg           *config.Config
-	logger        log.Logger
-	userSvc       service.ResourceGetService[entities.User]
-	projectSvc    service.ResourceGetService[entities.Project]
-	limiter       http.Limiter
-	pullingTicker *time.Ticker
-	startChan     chan struct{}
-	stopChan      chan struct{}
+	cfg        *config.Config
+	logger     log.Logger
+	userSvc    service.ResourceGetService[entities.User]
+	projectSvc service.ResourceGetService[entities.Project]
+	limiter    http.Limiter
+	startChan  chan struct{}
+	stopChan   chan struct{}
 }
 
 const configPath string = "./config.json"
@@ -54,14 +53,13 @@ func NewApp() (*App, error) {
 	projectSvc := service.NewProjectGetService(cl, cfg)
 
 	return &App{
-		cfg:           cfg,
-		logger:        logger,
-		userSvc:       userSvc,
-		projectSvc:    projectSvc,
-		limiter:       lm,
-		pullingTicker: time.NewTicker(cfg.ExtractionRateDuration),
-		startChan:     make(chan struct{}),
-		stopChan:      make(chan struct{}),
+		cfg:        cfg,
+		logger:     logger,
+		userSvc:    userSvc,
+		projectSvc: projectSvc,
+		limiter:    lm,
+		startChan:  make(chan struct{}),
+		stopChan:   make(chan struct{}),
 	}, nil
 }
 
@@ -69,20 +67,15 @@ func (a *App) run() error {
 	go func() {
 		a.startChan <- struct{}{}
 	}()
+
 	for {
-		select {
-		case <-a.startChan:
-			if err := a.fetchData(); err != nil {
-				a.logger.Debug("Starting fetching")
-				return errors.Wrap(err, "failed to fetch data")
-			}
-		case <-a.pullingTicker.C:
-			a.logger.Debug("Tick")
+		go func() {
+			time.Sleep(a.cfg.ExtractionRateDuration)
 			a.stopChan <- struct{}{}
-			go func() {
-				time.Sleep(a.cfg.ExtractionRateDuration)
-				a.startChan <- struct{}{}
-			}()
+		}()
+		if err := a.fetchData(); err != nil {
+			a.logger.Debug("Starting fetching")
+			return errors.Wrap(err, "failed to fetch data")
 		}
 	}
 }
@@ -110,6 +103,7 @@ func (a *App) fetchData() error {
 			}
 		case <-a.stopChan:
 			a.logger.Debug("Stopping fetching")
+			time.Sleep(a.cfg.ExtractionRateDuration)
 			return nil
 		}
 	}
