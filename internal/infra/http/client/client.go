@@ -25,6 +25,7 @@ type client struct {
 	limiter http.Limiter
 }
 
+// NewClient creates a new http client.
 func NewClient(baseURL, token string, limiter http.Limiter, logger log.Logger) http.Client {
 	rc := resty.New().
 		SetHeaders(
@@ -44,6 +45,7 @@ func NewClient(baseURL, token string, limiter http.Limiter, logger log.Logger) h
 	}
 }
 
+// Get performs a GET request, transferring the response to the response argument object.
 func (c *client) Get(url string, response any) error {
 	body, err := c.GetRaw(url)
 	if err != nil {
@@ -57,6 +59,8 @@ func (c *client) Get(url string, response any) error {
 	return nil
 }
 
+// GetRaw performs a GET request and returns the raw response body.
+// It also checks for rate limit exceeded responses and sleeps for the required time.
 func (c *client) GetRaw(url string) ([]byte, error) {
 	c.logger.Debug("Performing GET request", "url", url)
 

@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// App represents the application core structure.
 type App struct {
 	cfg        *config.Config
 	logger     log.Logger
@@ -27,6 +28,7 @@ type App struct {
 
 const configPath string = "./config.json"
 
+// Run starts the application.
 func Run() error {
 	app, err := NewApp()
 	if err != nil {
@@ -36,6 +38,7 @@ func Run() error {
 	return app.run()
 }
 
+// NewApp creates a new App instance.
 func NewApp() (*App, error) {
 	cfg, err := config.NewConfig(configPath)
 	if err != nil {

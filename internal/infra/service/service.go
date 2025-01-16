@@ -7,10 +7,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ResourceGetService is an interface for fetching resources from the API.
 type ResourceGetService[T ResourceConstraint] interface {
+	// Get fetches the resources from the API.
 	Get() ([]T, error)
 }
 
+// ResourceConstraint is an interface for constraining the resource type.
 type ResourceConstraint interface {
 	entities.User | entities.Project
 }
@@ -21,6 +24,7 @@ type service[T ResourceConstraint] struct {
 	cfg          *config.Config
 }
 
+// NewUserGetService creates a new user get service.
 func NewUserGetService(client http.Client, cfg *config.Config) ResourceGetService[entities.User] {
 	return &service[entities.User]{
 		cl:           client,
@@ -29,6 +33,7 @@ func NewUserGetService(client http.Client, cfg *config.Config) ResourceGetServic
 	}
 }
 
+// NewProjectGetService creates a new project get service.
 func NewProjectGetService(client http.Client, cfg *config.Config) ResourceGetService[entities.Project] {
 	return &service[entities.Project]{
 		cl:           client,
@@ -37,6 +42,7 @@ func NewProjectGetService(client http.Client, cfg *config.Config) ResourceGetSer
 	}
 }
 
+// Get fetches the resources from the API.
 func (s *service[T]) Get() ([]T, error) {
 	url, err := s.constructAPIUrlFromResource()
 	if err != nil {
